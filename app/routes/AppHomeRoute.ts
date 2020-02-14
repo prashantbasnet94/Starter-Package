@@ -1,18 +1,20 @@
-import {Home} from "../controllers/Home";
+import {MovingAverages} from "../controllers/MovingAverages";
 
 
 
 
 
 export  class AppHomeRoute {
-    public home:Home =new Home();
+    public technicalIndicator:MovingAverages =new MovingAverages();
 
     public routes(app:any):void{
 
 
 
-        app.route('/test')
-            .get(this.home.test);
+        app.route('/sma')
+            .get(this.technicalIndicator.sma);
+        app.route('/ema')
+            .get(this.technicalIndicator.ema);
 
     }
 

@@ -1,4 +1,7 @@
 import {Response} from "express";
+import {MovingAverage} from "./MovingAverage";
+const technicalindicators = require('technicalindicators');
+
 const Binance = require('node-binance-api');
 
 const binance = new Binance().options({
@@ -6,47 +9,47 @@ const binance = new Binance().options({
     APISECRET: 'DSzbo5YNTsViNNQ84sdwNiLEMkn1WVqEz8cW3DUICMpVBKLin40xctCi4OzhwwSh'
 });
 
-export class Home {
+let ma: MovingAverage = new MovingAverage();
 
-
-    async test(req:any,res:any){
+ export class Home {
+    async test(req:any,res:any) {
         let ticker = await binance.prices();
+        binance.websockets.chart("BTCUSDT", "1d", (symbol, interval, chart) => {
+            let tick = binance.last(chart);
+            const last = chart[tick].close;
+             let ohlc = binance.ohlc(chart);
+             //blue
 
-        //console.log(ticker)
-        binance.prices('', (error:any, ticker:any) => {
-           // console.log("Price of BNB: ", ticker);
+            console.log('\n\n\n\n')
+             let sma9 = technicalindicators.sma({period:9,values:ohlc.close}).pop();
+             console.log(` 9 : ${ sma9}.`);
+             //green
+            let sma13 = technicalindicators.sma({period:13,values:ohlc.close}).pop();
+             console.log(` 13 : ${ sma13}.`);
+             //yellow
+            let sma21 = technicalindicators.sma({period:21,values:ohlc.close}).pop();
+            console.log(` 21 : ${ sma21}.`);
+            //red
+            let sma55 = technicalindicators.sma({period:55,values:ohlc.close}).pop();
+             console.log(` 55 : ${ sma55}.`);
+             
+              if(sma9>sma13 && sma9>sma21 && sma9>sma55     &&  sma13>sma21 && sma13>sma55     &&     sma21>sma55){
+                  //invest
+                  console.log(sma9,sma13,sma21,sma55)
+              }
+
+
+
+
         });
 
-
-        binance.prevDay(false, (error:any, prevDay:any) => {
-            // console.log(prevDay); // view all data
-            for ( let obj of prevDay ) {
-                let symbol = obj.symbol;
-                if(obj.priceChangePercent<-20 ){
-                  //  console.log(symbol+" volume:"+obj.volume+" change: "+obj.priceChangePercent+"%");
-                }
-
-            }
-        });
-
-        // Intervals: 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M
-        binance.candlesticks("BNBBTC", "5m", (error:any, ticks:any, symbol:any) => {
-            console.log("candlesticks()", ticks);
-            let last_tick = ticks[ticks.length - 1];
-            let [time, open, high, low, close, volume, closeTime, assetVolume, trades, buyBaseVolume, buyAssetVolume, ignored] = last_tick;
-            console.log(symbol+" last close: "+close);
-            console.log(symbol+" high: "+high);
-
-        }, {limit: 500, endTime: 1514764800000});
-
-
-        binance.trades("ETHBTC", (error:any, trades:any, symbol:any) => {
-           // console.log(symbol+" trade history", trades);
-            res.send(symbol+"  trade history   "+trades);
-
-        });
 
     }
+
+
+
+
+
 
 
 
